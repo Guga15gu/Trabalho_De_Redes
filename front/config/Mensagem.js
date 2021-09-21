@@ -10,4 +10,4 @@ class Mensagem{
     }
   }
 
-  export {Mensagem}
+  export {Mensagem}//comentar essa linha no backend

@@ -44,8 +44,8 @@ export default {
       }, this.velocidade);
     },
     mandaPontos(n) {
-      console.log(`fez ${n} pontos em ${this.tecla}`)
-      this.$emit("atualizaPontos", n);
+      //console.log(`fez ${n} pontos em ${this.tecla}`)
+      this.$emit("maisPontos", n);
     },
   },
   created: function () {
