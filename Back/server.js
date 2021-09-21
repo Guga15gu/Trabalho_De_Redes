@@ -19,6 +19,8 @@ let controleBolinhas
 
 //Conexão
 wss.on('connection', ws => {//Conexão foi aberta
+    console.log(ws._socket._server)
+    console.log("conexão" + ws._socket._server)
     ws.on('message', mensagem => {
         console.log(`Recebi => ${mensagem}`)
         const resposta = JSON.parse(mensagem)
@@ -57,6 +59,7 @@ function resetaPontos(ws){
 function controlaEstado(ws,estado){
     let resposta
     if(estado==1){
+        resetaPontos(ws)
         controlaAsBolinhas(ws)
         resposta = new Mensagem("server", "controleJogo", "jogoIniciou")
     }

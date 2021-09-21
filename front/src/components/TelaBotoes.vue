@@ -91,6 +91,7 @@ export default {
   beforeCreate: function () {
     const url = `ws://${ip}:9595`;
     this.connection = new WebSocket(url);
+    console.log(this.connection)
 
     this.connection.onopen = () => {
       let conexaoAberta = new Mensagem(
