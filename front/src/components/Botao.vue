@@ -38,11 +38,14 @@ export default {
           this.posicaoNota = -50;
           clearInterval(movimenta);
           this.emMovimento = false;
-          //Todo: erro por perder a tecla
           return;
         }
         this.posicaoNota += 5;
       }, this.velocidade);
+    },
+    mandaPontos(n) {
+      console.log(`fez ${n} pontos em ${this.tecla}`)
+      this.$emit("atualizaPontos", n);
     },
   },
   created: function () {
@@ -50,11 +53,11 @@ export default {
       if (event.key.toLowerCase() == this.tecla.toLowerCase()) {
         event.stopImmediatePropagation();
         if (this.posicaoNota >= 365 && this.posicaoNota < 375) {
-          console.log(`FEZ MEIO PONTO APERTANDO ${this.tecla}`); //  TODO FEZ MEIO PONTO
+          this.mandaPontos(5);
         } else if (this.posicaoNota >= 375 && this.posicaoNota <= 390) {
-          console.log(`FEZ PONTO APERTANDO ${this.tecla}`); //TODO FEZ PONTO COMPLETO
+          this.mandaPontos(10);
         } else {
-          console.log(`ERROU ${this.tecla}`); //TODO ERROU
+          this.mandaPontos(0);
         }
       }
     });
