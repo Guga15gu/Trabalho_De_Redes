@@ -3,68 +3,64 @@ const Game = require('./classes.js')
 const port = 8080
 
 var sala = 0
-var game = null
-
+var gameSalas = []
+var game = false
+var map = new Map()
 const server = net.createServer( (socket2) => {
 
-    var x ={estado: 0, opcode: "", socket: socket2} 
-    //var estado = 0
-    //var opcode = ""
-    //var socket
+    //var x ={estado: 0, opcode: "", game: null}
 
-    x.socket = socket2
-    console.log('Connection from', x.socket.remoteAddress, 'port', x.socket.remotePort);
+    //x.socket = socket2
+    console.log('Connection from', socket2.remoteAddress, 'port', socket2.remotePort);
     
-    if (game === null) {
-        game = new Game(sala);
-        ++sala
-        game.addPlayer("teste", x.socket)
+    if (!game) {
+        game = true
+        gameSalas.push(new Game(sala, 0, ""))
+
+        map.set(socket2.remotePort, sala)
+        gameSalas[sala].addPlayer("teste", socket2)
     } 
     else {
-        game.addPlayer("teste2", x.socket)
-        game = null;
+        map.set(socket2.remotePort, sala)
+        gameSalas[sala].addPlayer("teste2", socket2)
+        game = false;
+        ++sala
     }
-    /*
-    socket.on("connect", (socket) => {
-        console.log("Connect")
-    })
-    */
+    var salaCliente = map.get(socket2.remotePort)
 
-    //var conectadoPlayer = False, False
-    //var prontoPlayer = False, False
-    x.socket.write("Olá")
+    socket2.write("Olá")
 
-    x.socket.on("data", (data) => {
+    socket2.on("data", (data) => {
 
         console.log("Mensagem recebida: %s", data)
 
-        x.opcode = data.toString().substring(0, data.indexOf(" "))
-        
-        switch (x.estado){
+        gameSalas[salaCliente].setOpcode(data.toString().substring(0, data.indexOf(" ")))
+
+        switch (gameSalas[salaCliente].getEstado()){
             case 0:
-                estado_0(x)
+                estado_0(gameSalas[salaCliente], socket2)
             break;
         
             case 1:
-                estado_1(x)
+                estado_1(gameSalas[salaCliente], socket2)
             break;
             
             case 2:
-                estado_2(x)
+                estado_2(gameSalas[salaCliente], socket2)
             break;
     
             case 3:
-                estado_3(x)
+                estado_3(gameSalas[salaCliente], socket2)
             break;
 
             default:
-                console.log("Estado %d não identificado", estado)
+                console.log("Estado %d não identificado", gameSalas[salaCliente].getEstado())
             break
         }
 
     })
 
-    x.socket.on("end", () => {
+    socket2.on("end", () => {
         console.log("Conexão finalizada")
     })
 
@@ -72,71 +68,89 @@ const server = net.createServer( (socket2) => {
 
 server.listen(port);
 
-function estado_0(x){
+function estado_0(x, socket){
 
     console.log("estado_0")
 
-    switch (x.opcode){
+    console.log("Opcode - %s - identificado", x.getOpcode())
+    switch (x.getOpcode()){
 
         case "Conectar":
-            console.log("Opcode - %s - identificado", x.opcode)
-            x.estado = 1
-            x.socket.write("Conectado ")
-            break
-        case "":
-            console.log("???", x.opcode)
-            break
+            
+            if(x.getNumJogadores() == 1){
+                x.setEstado(0)
+                socket.write("Conectado ")
+            }
+            else{
+                x.setEstado (1)
+                socket.write("Conectado ")
+            }
+        break
+        case "Pronto":
+            x.getPlayer(socket).setPronto(true)
+            //socket.write("Conectado ")
+        break
         default:
-            console.log("Opcode - %s - não identificado", x.opcode)
             //socket.write("Opcode Errado")
-            break
+        break
     }
 }
 
-function estado_1(x){
+function estado_1(x, socket){
 
     console.log("estado_1")
-    switch (x.opcode){
+    switch (x.getOpcode()){
 
         case "Pronto":
-            console.log("Opcode - %s - identificado", x.opcode)
-            x.estado = 2
-            x.socket.write("Começou ")
+            console.log("Opcode - %s - identificado", x.getOpcode())
+
+            x.getPlayer(socket).setPronto(true)
+
+            if(x.todosPlayersProntos()){
+                x.setEstado(2)
+                x.writeAllPlayers("Comecou ")
+            }
+            else{
+                
+                x.setEstado(1)
+                //x.socket.write("EsperandoOutroPronto ")
+            }
             break
+
         case "":
-            console.log("Opcode - %s - identificado", x.opcode)
+            console.log("Opcode - %s - identificado", x.getOpcode())
             break
         default:
-            console.log("Opcode - %s - não identificado", x.opcode)
-            x.socket.write("OpcodeErrado ")
+            console.log("Opcode - %s - não identificado", x.getOpcode())
+            socket.write("OpcodeErrado ")
             break
     }
 }
 
-function estado_2(x){
+function estado_2(x, socket){
 
     console.log("estado_2")
-    switch (x.opcode){
+    switch (x.getOpcode()){
 
         case "Acerto":
-            console.log("Opcode - %s - identificado", x.opcode)
+            console.log("Opcode - %s - identificado", x.getOpcode())
             
             break
         case "Erro":
-            console.log("Opcode - %s - identificado", x.opcode)
+            console.log("Opcode - %s - identificado", x.getOpcode())
            
             break
         case "MeioAcerto":
-            console.log("Opcode - %s - identificado", x.opcode)
+            console.log("Opcode - %s - identificado", x.getOpcode())
             break
         default:
-            console.log("Opcode - %s - não identificado", x.opcode)
+            console.log("Opcode - %s - não identificado", x.getOpcode())
             //socket.write("OpcodeErrado ")
             break
     }
 }
 
-function estado_3(x){
+function estado_3(x, socket){
 
     console.log("estado_3")
     socket.write("FimDeJogo ")

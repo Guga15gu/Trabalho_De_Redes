@@ -30,7 +30,10 @@ client.on('data', (data) => {
         case 3:
             estado_3()
         break
-    
+        
+        case 4:
+            estado_4()
+        break
         default:
             console.log("Estado %d não identificado", estado)
         break
@@ -50,35 +53,35 @@ function estado_1(){
     console.log("estado_1")
     client.write("Pronto ")
     estado = 2
-    /*
+}
+
+function estado_2(){
+    console.log("estado_2")
+
     switch (opcode){
-
-        case "Pronto":
-
-            estado = 2
+        case "Comecou":
+            estado = 3
         break
-        
+
         case "":
         break
 
         default:
-            console.log("Opcode %s no estado %d não identificado", opcode, estado)
-
+            console.log("Opcode - %s - não identificado", opcode)
         break
-    }
-    */
+    }   
+
 }
+function estado_3(){
 
-function estado_2(){
-
-    console.log("estado_2")
+    console.log("estado_3")
     client.write("Acerto ")
     
 }
 
-function estado_3(){
+function estado_4(){
 
-    console.log("estado_3")
+    console.log("estado_4")
     client.end();
 }
 

@@ -3,25 +3,69 @@ class Game {
     #id
     #numJogadores
     #players
-    constructor(id){
+    #estado
+    #opcode
+    constructor(id, estado, opcode){
 
         this.#id = id
         this.#numJogadores = 0
         this.#players = []
+        this.#opcode = opcode
+        this.#estado = estado
     }
 
     addPlayer(nome, socket){
         this.#players.push(new Player(this.#numJogadores, nome, socket))
+        ++this.#numJogadores;
     }
 
-    getPlayer(num){
-        return this.#players[num]
+    //removePlayer(){
+
+    //}
+
+    getPlayer(s){
+        
+        for(var i = 0; i< this.#numJogadores; ++i){
+            if(this.#players[i].getSocket() == s){
+                return this.#players[i]
+            }
+        }
+        return null
     }
 
     getId(){
         return this.#id
     }
+    getNumJogadores(){
+        return this.#numJogadores
+    }
+    getOpcode(){
+        return this.#opcode
+    }
+    setOpcode(x){
+        this.#opcode = x
+    }
+    getEstado(){
+        return this.#estado
+    }
+    setEstado(num){
+        this.#estado = num
+    }
 
+    todosPlayersProntos(){
+
+        for(var i = 0; i< this.#numJogadores; ++i){
+            if(!this.#players[i].getPronto()){
+                return false
+            }
+        }
+        return true
+    }
+    writeAllPlayers(message){
+        for(var i = 0; i< this.#numJogadores; ++i){
+            this.#players[i].sendMessage(message)
+        }
+    }
 }
 
 class Player {
@@ -29,6 +73,7 @@ class Player {
     #num
     #nome
     #socket
+    #pronto
     #acertos
     #meioAcertos
     #erros
@@ -37,6 +82,7 @@ class Player {
         this.#num = num
         this.#nome = nome
         this.#socket = socket
+        this.#pronto = false
         this.#acertos = [0, 0, 0, 0]
         this.#meioAcertos = [0, 0, 0, 0]
         this.#erros = [0, 0, 0, 0]
@@ -51,6 +97,9 @@ class Player {
         this.#socket = socket
     }
 
+    getSocket(){
+        return this.#socket
+    }
     addAcerto(qual){
         ++this.#acertos[qual]
     }
@@ -81,6 +130,12 @@ class Player {
 
     getNum(){
         return this.#num
+    }
+    getPronto(){
+        return this.#pronto
+    }
+    setPronto(x){
+        this.#pronto = x
     }
 }
 module.exports = Game
