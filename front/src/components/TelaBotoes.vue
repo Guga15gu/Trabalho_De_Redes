@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div class = "container">
+    <Monitor :mensagens="listaDeComandos"/>
     <div v-if="mode == 'iniciar'" class="telaInicial">
       <h1>Trabalho de Redes 2021/1</h1>
       <h2>Gustavo Machado e Letícia Garcez</h2>
@@ -40,7 +41,9 @@
 
 <script>
 import Botao from "./Botao.vue";
+import Monitor from "./Monitor.vue"
 import { ip } from "../../config/ip";
+
 export default {
   data: function () {
     return {
@@ -50,10 +53,12 @@ export default {
       ativaD: 0,
       ativaF: 0,
       pontos: 0,
+      listaDeComandos: []
     };
   },
   components: {
     Botao,
+    Monitor,
   },
   methods: {
     iniciaJogo: async function () {
@@ -110,13 +115,13 @@ export default {
     },
     mensagemProServidor: function (tipo, mensagem){
       const mensagemFormatada = JSON.stringify({tipo,mensagem})
-      console.log("Mandei" + mensagemFormatada)
+      this.listaDeComandos.push({tipo: "enviadaDoCliente", mensagemFormatada})
         this.connection.send(mensagemFormatada)
     },
     mensagemDoServidor(msg){
-      const resposta = JSON.parse(msg.data);
-      console.log(resposta);
-      return resposta
+      const mensagemFormatada = JSON.parse(msg.data);
+      this.listaDeComandos.push({tipo: "enviadaDoServidor", mensagemFormatada})
+      return mensagemFormatada
     }
   },
 };
@@ -153,6 +158,7 @@ export default {
   align-items: center;
   height: 90vh;
   color: white;
+  flex-grow: 5;
 }
 
 .controleJogo {
@@ -173,4 +179,5 @@ export default {
 .controleJogo:hover {
   box-shadow: 10px 5px 5px rgba(0, 0, 0, 0.507);
 }
+
 </style>

@@ -10,7 +10,7 @@ export default {
   data: function () {
     return {
       posicaoNota: -50,
-      velocidade: 30, //tempo em milissegundos
+      velocidade: 15, //tempo em milissegundos
       emMovimento: false,
     };
   },

@@ -7,7 +7,7 @@ const mensagemProCliente = function (tipo, mensagem){
     return mensagemFormatada
   }
 
-const DELAYBOLINHAS = 1200
+const DELAYBOLINHAS = 1500
 let pontosTotais = 0
 let controleBolinhas
 
@@ -56,6 +56,7 @@ function controlaEstado(ws,estado){
         clearInterval(controleBolinhas)
        resetaPontos(ws)
         resposta = mensagemProCliente("controleJogo", "jogoTerminou")
+        ws.close()
     } else{
         return
     }
