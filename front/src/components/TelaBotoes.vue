@@ -76,6 +76,7 @@ export default {
     },
 
     ligaBolinha: function (n) {
+      //console.log(n)
       switch (n) {
         case 0:
           this.ativaA++;
@@ -93,7 +94,7 @@ export default {
     },
 
     iniciaConexao: function () {
-      const url = `ws://${ip}:9595`;
+      const url = `ws://${ip}:9585`;
       this.connection = new WebSocket(url);
 
       this.connection.onopen = ()=>{
@@ -102,7 +103,6 @@ export default {
 
       this.connection.onmessage = (e) => {
         const resposta = this.mensagemDoServidor(e)
-
         switch (resposta.tipo) {
           case "atualizacaoPontos":
             this.pontos = resposta.mensagem;
@@ -115,12 +115,12 @@ export default {
     },
     mensagemProServidor: function (tipo, mensagem){
       const mensagemFormatada = JSON.stringify({tipo,mensagem})
-      this.listaDeComandos.push({tipo: "enviadaDoCliente", mensagemFormatada})
+      this.listaDeComandos.push({tipo: "enviadaDoCliente", mensagemFormatada, k:this.listaDeComandos.length})
         this.connection.send(mensagemFormatada)
     },
     mensagemDoServidor(msg){
       const mensagemFormatada = JSON.parse(msg.data);
-      this.listaDeComandos.push({tipo: "enviadaDoServidor", mensagemFormatada})
+      this.listaDeComandos.push({tipo: "enviadaDoServidor", mensagemFormatada, k:this.listaDeComandos.length})
       return mensagemFormatada
     }
   },

@@ -2,7 +2,7 @@
     <div id = "monitor">
         <h2>Monitor de Mensagens</h2>
         <ul>
-            <li v-for= "msg in mensagens" :key=msg :class = "msg.tipo">{{msg.mensagemFormatada}}</li>
+            <li v-for= "msg in mensagens" :key=msg.key :class = "msg.tipo">{{msg.mensagemFormatada}}</li>
         </ul>
     </div>
 </template>
