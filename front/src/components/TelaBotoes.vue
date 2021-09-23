@@ -64,6 +64,13 @@ export default {
     Botao,
     Monitor,
   },
+   created(){
+    const vue = this
+     window.addEventListener('beforeunload',function(event) {
+      event.preventDefault()
+      vue.finalizaJogo()
+       });
+  },
   methods: {
     iniciaJogo: function () {
       this.mode = "jogo";
@@ -142,7 +149,7 @@ export default {
         mensagemFormatada,
         k: this.listaDeComandos.length,
       });
-      this.connection.send(mensagemFormatada);
+      this.connection?.send(mensagemFormatada);
     },
     mensagemDoServidor(msg) {
       const mensagemFormatada = JSON.parse(msg.data);
@@ -153,7 +160,7 @@ export default {
       });
       return mensagemFormatada;
     },
-  },
+  }, 
 };
 </script>
 
@@ -173,7 +180,7 @@ div#pontos h1 {
   background-color: #dab351ce;
   border-radius: 40px;
   display: block;
-  width: 200px;
+  width: 280px;
   height: 60px;
   padding: 10px;
   margin: 30px;

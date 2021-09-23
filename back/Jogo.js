@@ -14,6 +14,7 @@ class Jogo {
     adicionaJogador(ws) {
         if (this.jogadores.length === 0) {
             this.jogadores.push({ws,pontos:0})
+            this.jogadores[0]?.ws.send(this.mensagemProCliente("controleJogador", "jogadoresInsuficientes"))
         }
         else if (this.jogadores.length === 1) {
             this.jogadores.push({ws, pontos: 0})
@@ -22,6 +23,7 @@ class Jogo {
             this.iniciaJogo()
         } else {
             console.log("Temos jogadores demais")
+            this.jogadores[0]?.ws.send(this.mensagemProCliente("controleJogador", "jogadoresDemais"))
         }
     }
 
