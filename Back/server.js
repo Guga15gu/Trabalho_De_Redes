@@ -1,17 +1,11 @@
 const WebSocket = require('ws')
 const wss = new WebSocket.Server({ port: 9595 })
 
-class Mensagem {
-    constructor(remetente, tipoMensagem, mensagem) {
-        this.remetente = remetente
-        this.tipoMensagem = tipoMensagem
-        this.mensagem = mensagem
-    }
-
-    mensagemFormatada() {
-        return JSON.stringify(this)
-    }
-}
+const mensagemProCliente = function (tipo, mensagem){
+    const mensagemFormatada = JSON.stringify({tipo,mensagem})
+    console.log("Mandei" + mensagemFormatada)
+    return mensagemFormatada
+  }
 
 const DELAYBOLINHAS = 1200
 let pontosTotais = 0
@@ -19,12 +13,10 @@ let controleBolinhas
 
 //Conexão
 wss.on('connection', ws => {//Conexão foi aberta
-    console.log(ws._socket._server)
-    console.log("conexão" + ws._socket._server)
     ws.on('message', mensagem => {
         console.log(`Recebi => ${mensagem}`)
         const resposta = JSON.parse(mensagem)
-        switch (resposta.tipoMensagem) {//Formatação de acordo com o tipo de mensagem
+        switch (resposta.tipo) {//Formatação de acordo com o tipo de mensagem
             case "atualizacaoPontos":
                 atualizaPontos(ws, resposta.mensagem)
                 break;
@@ -38,22 +30,19 @@ wss.on('connection', ws => {//Conexão foi aberta
 function controlaAsBolinhas(ws) {
  controleBolinhas = setInterval(() => {
         const bolinha = Math.trunc(Math.random() * 4)
-        const mensagem = new Mensagem("server", "ligaBolinha", bolinha)
-        ws.send(mensagem.mensagemFormatada())
+        ws.send(mensagemProCliente("ligaBolinha", bolinha))
     }, DELAYBOLINHAS);
 
 }
 
 function atualizaPontos(ws, valor) {
     pontosTotais += +valor
-    const pontosAtualizados = new Mensagem("server", "atualizacaoPontos", pontosTotais)
-    ws.send(pontosAtualizados.mensagemFormatada())
+    ws.send(mensagemProCliente("atualizacaoPontos", pontosTotais))
 }
 
 function resetaPontos(ws){
     pontosTotais =0
-    const pontosAtualizados = new Mensagem("server", "atualizacaoPontos", pontosTotais)
-    ws.send(pontosAtualizados.mensagemFormatada())
+    ws.send(mensagemProCliente("atualizacaoPontos", pontosTotais))
 }
 
 function controlaEstado(ws,estado){
@@ -61,14 +50,14 @@ function controlaEstado(ws,estado){
     if(estado==1){
         resetaPontos(ws)
         controlaAsBolinhas(ws)
-        resposta = new Mensagem("server", "controleJogo", "jogoIniciou")
+        resposta = mensagemProCliente("controleJogo", "jogoIniciou")
     }
     else if (estado ==0){
         clearInterval(controleBolinhas)
        resetaPontos(ws)
-        resposta = new Mensagem("server", "controleJogo", "jogoTerminou")
+        resposta = mensagemProCliente("controleJogo", "jogoTerminou")
     } else{
         return
     }
-    ws.send(resposta.mensagemFormatada())
+    ws.send(resposta)
 }

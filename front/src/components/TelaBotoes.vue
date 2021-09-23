@@ -1,11 +1,11 @@
 <template>
   <div>
-    <div v-if="mode == 'iniciar'" class = "telaInicial">
+    <div v-if="mode == 'iniciar'" class="telaInicial">
       <h1>Trabalho de Redes 2021/1</h1>
       <h2>Gustavo Machado e Letícia Garcez</h2>
       <button @click="iniciaJogo" class="controleJogo">Iniciar</button>
     </div>
-    <div v-else >
+    <div v-else>
       <div id="conjuntoTeclas">
         <Botao
           cor="#54478C"
@@ -41,7 +41,6 @@
 <script>
 import Botao from "./Botao.vue";
 import { ip } from "../../config/ip";
-import { Mensagem } from "../../config/Mensagem";
 export default {
   data: function () {
     return {
@@ -57,10 +56,20 @@ export default {
     Botao,
   },
   methods: {
-    atualizaPontuacao: function (e) {
-      let alteracaoDePontos = new Mensagem("cliente1", "atualizacaoPontos", e);
-      this.connection.send(alteracaoDePontos.mensagemFormatada());
+    iniciaJogo: async function () {
+      this.mode = "jogo";
+      this.iniciaConexao();
     },
+
+    finalizaJogo: function () {
+      this.mode = "iniciar";
+      this.mensagemProServidor( "controleJogo", 0);
+    },
+
+    atualizaPontuacao: function (e) {
+      this.mensagemProServidor("atualizacaoPontos", e);
+    },
+
     ligaBolinha: function (n) {
       switch (n) {
         case 0:
@@ -77,49 +86,38 @@ export default {
           break;
       }
     },
-    iniciaJogo: function(){
-      this.mode = "jogo"
-      let iniciaJogo = new Mensagem("cliente1", "controleJogo", 1) 
-      this.connection.send(iniciaJogo.mensagemFormatada())
-    },
-      finalizaJogo: function(){
-      this.mode = "iniciar"
-      let finalizaJogo = new Mensagem("cliente1", "controleJogo", 0) 
-      this.connection.send(finalizaJogo.mensagemFormatada())
-    }
-  },
-  beforeCreate: function () {
-    const url = `ws://${ip}:9595`;
-    this.connection = new WebSocket(url);
-    console.log(this.connection)
 
-    this.connection.onopen = () => {
-      let conexaoAberta = new Mensagem(
-        "cliente 1",
-        "abertura",
-        "cliente ligado"
-      );
-      this.connection.send(conexaoAberta.mensagemFormatada());
-    };
+    iniciaConexao: function () {
+      const url = `ws://${ip}:9595`;
+      this.connection = new WebSocket(url);
 
-    this.connection.onerror = (error) => {
-      console.log(`WebSocket error: ${error}`);
-    };
-
-    this.connection.onmessage = (e) => {
-      let resposta = JSON.parse(e.data);
-      console.log(resposta);
-      switch (
-        resposta.tipoMensagem //Formatação de acordo com o tipo de mensagem
-      ) {
-        case "atualizacaoPontos":
-          this.pontos = resposta.mensagem;
-          break;
-        case "ligaBolinha":
-          this.ligaBolinha(resposta.mensagem);
-          break;
+      this.connection.onopen = ()=>{
+        this.mensagemProServidor( "controleJogo", 1)
       }
-    };
+
+      this.connection.onmessage = (e) => {
+        const resposta = this.mensagemDoServidor(e)
+
+        switch (resposta.tipo) {
+          case "atualizacaoPontos":
+            this.pontos = resposta.mensagem;
+            break;
+          case "ligaBolinha":
+            this.ligaBolinha(resposta.mensagem);
+            break;
+        }
+      };
+    },
+    mensagemProServidor: function (tipo, mensagem){
+      const mensagemFormatada = JSON.stringify({tipo,mensagem})
+      console.log("Mandei" + mensagemFormatada)
+        this.connection.send(mensagemFormatada)
+    },
+    mensagemDoServidor(msg){
+      const resposta = JSON.parse(msg.data);
+      console.log(resposta);
+      return resposta
+    }
   },
 };
 </script>
@@ -138,26 +136,26 @@ export default {
   display: block;
   width: 200px;
   height: 60px;
-  padding:10px;
+  padding: 10px;
   margin: auto;
   margin-top: 30px;
-  margin-bottom:30px;
-  color:rgb(255, 255, 255);
+  margin-bottom: 30px;
+  color: rgb(255, 255, 255);
 }
 
-.telaInicial{
+.telaInicial {
   display: flex;
   flex-direction: column;
-    background-color: #048aa8e7;
-    padding:30px;
-    border-radius: 40px;
-    justify-content: center;
-    align-items: center;
-    height: 90vh;
-    color:white;
+  background-color: #048aa8e7;
+  padding: 30px;
+  border-radius: 40px;
+  justify-content: center;
+  align-items: center;
+  height: 90vh;
+  color: white;
 }
 
-.controleJogo{
+.controleJogo {
   font-size: 20px;
   width: 200px;
   height: 80px;
@@ -168,11 +166,11 @@ export default {
   text-align: center;
 }
 
-.finalizar{
-    display: block;
-  margin:auto;
+.finalizar {
+  display: block;
+  margin: auto;
 }
-.controleJogo:hover{
-box-shadow: 10px 5px 5px rgba(0, 0, 0, 0.507);
+.controleJogo:hover {
+  box-shadow: 10px 5px 5px rgba(0, 0, 0, 0.507);
 }
 </style>
