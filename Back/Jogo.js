@@ -1,7 +1,6 @@
 class Jogo {
     //Todos os atributos estão públicos porque tenho preguiça de implementar os gets e sets
     id
-    pontosTotais
     DELAYBOLINHAS
     ws
     controleBolinhas
@@ -11,8 +10,7 @@ class Jogo {
     // players
     // estado
     // opcode
-    constructor(pontos, delayBolinhas) {
-        this.pontosTotais = pontos
+    constructor(delayBolinhas) {
         this.DELAYBOLINHAS = delayBolinhas
         //this.id = ws._socket.remoteAddress.substr(7),
         //console.log(this.id)
@@ -24,10 +22,10 @@ class Jogo {
 
     adicionaJogador(ws) {
         if (this.jogadores.length === 0) {
-            this.jogadores.push(ws)
+            this.jogadores.push({ws,pontos:0})
         }
         else if (this.jogadores.length === 1) {
-            this.jogadores.push(ws)
+            this.jogadores.push({ws, pontos: 0})
             this.jogadoresSuficientes = true
             console.log("Número correto de jogadores")
             this.iniciaJogo()
@@ -42,11 +40,11 @@ class Jogo {
 
     enviaMensagemDoJogo(tipo, mensagem) {
         if (this.jogadoresSuficientes) {
-            this.jogadores[0]?.send(this.mensagemProCliente(tipo, mensagem))
-            this.jogadores[1]?.send(this.mensagemProCliente(tipo, mensagem))
+            this.jogadores[0]?.ws.send(this.mensagemProCliente(tipo, mensagem))
+            this.jogadores[1]?.ws.send(this.mensagemProCliente(tipo, mensagem))
         } else {
-            this.jogadores[0]?.send(this.mensagemProCliente("controleJogador", "jogadoresInsuficientes"))
-            this.jogadores[1]?.send(this.mensagemProCliente("controleJogador", "jogadoresInsuficientes"))
+            this.jogadores[0]?.ws.send(this.mensagemProCliente("controleJogador", "jogadoresInsuficientes"))
+            this.jogadores[1]?.ws.send(this.mensagemProCliente("controleJogador", "jogadoresInsuficientes"))
         }
     }
 
@@ -64,14 +62,20 @@ class Jogo {
 
     }
 
-    atualizaPontos(valor) {
-        this.pontosTotais += +valor
-        this.enviaMensagemDoJogo("atualizacaoPontos", this.pontosTotais)
+    atualizaPontos(valor, jogador) {
+        if(jogador == this.jogadores[0].ws){
+            this.jogadores[0].pontos += valor
+            this.jogadores[0].ws.send(this.mensagemProCliente("atualizacaoPontos", this.jogadores[0].pontos))
+        } else if(jogador == this.jogadores[1].ws){
+            this.jogadores[1].pontos += valor
+            this.jogadores[1].ws.send(this.mensagemProCliente("atualizacaoPontos", this.jogadores[1].pontos))
+        }
     }
 
     resetaPontos() {
-        this.pontosTotais = 0
-        this.enviaMensagemDoJogo("atualizacaoPontos", this.pontosTotais)
+        this.jogadores[0].pontos = 0
+        this.jogadores[1].pontos = 0
+        this.enviaMensagemDoJogo("atualizacaoPontos", 0)
     }
 
     controlaEstado(controle) {
@@ -80,7 +84,8 @@ class Jogo {
         }
         else if (controle == 0) {
             this.finalizaJogo()
-            this.ws.close()
+            this.jogadores[0].ws.close()
+            this.jogadores[1].ws.close()
         } else {
             return
         }
@@ -95,6 +100,7 @@ class Jogo {
     finalizaJogo() {
         clearInterval(this.controleBolinhas)
         this.resetaPontos()
+        this.enviaMensagemDoJogo("resultadoFinal","fim")
         this.enviaMensagemDoJogo("controleJogo", "jogoTerminou")
     }
 }

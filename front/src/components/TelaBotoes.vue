@@ -4,7 +4,7 @@
     <div v-if="mode == 'iniciar'" class="telaInicial">
       <h1>Trabalho de Redes 2021/1</h1>
       <h2>Gustavo Machado e Letícia Garcez</h2>
-      <button @click="iniciaJogo" class="controleJogo">Iniciar</button>
+      <button @click="iniciaConexao" class="controleJogo">Iniciar</button>
     </div>
     <div v-else>
       <div id="conjuntoTeclas">
@@ -63,7 +63,7 @@ export default {
   methods: {
     iniciaJogo: async function () {
       this.mode = "jogo";
-      this.iniciaConexao();
+      //this.iniciaConexao();
     },
 
     finalizaJogo: function () {
@@ -98,7 +98,7 @@ export default {
       this.connection = new WebSocket(url);
 
       this.connection.onopen = ()=>{
-        this.mensagemProServidor( "controleJogo", 1)
+        this.mensagemProServidor( "controleJogo", "aguardando")
       }
 
       this.connection.onmessage = (e) => {
@@ -109,6 +109,18 @@ export default {
             break;
           case "ligaBolinha":
             this.ligaBolinha(resposta.mensagem);
+            break;
+          case "controleJogo":
+            if(resposta.mensagem === "jogoIniciou"){
+              this.iniciaJogo()
+            } else if (resposta.mensagem == "jogoTerminou"){
+              window.alert("Algum dos jogadores finalizou o jogo")
+            }
+            break;
+          case "resultadoFinal":
+            this.finalizaJogo()
+            //TODO IMPLEMENTAR A TELA FINAL
+            console.log(resposta.mensagem)
             break;
         }
       };
