@@ -45,6 +45,7 @@ export default {
     },
     mandaPontos(n) {
       //console.log(`fez ${n} pontos em ${this.tecla}`)
+      new Audio("https://dm0qx8t0i9gc9.cloudfront.net/previews/audio/BsTwCwBHBjzwub4i4/8-bit-hit-7_NWM.mp3").play()
       this.$emit("maisPontos", n);
     },
   },
@@ -52,7 +53,7 @@ export default {
     addEventListener("keypress", (event) => {
       if (event.key.toLowerCase() == this.tecla.toLowerCase()) {
         event.stopImmediatePropagation();
-        if (this.posicaoNota >= 365 && this.posicaoNota < 375) {
+        if (this.posicaoNota >= 350 && this.posicaoNota < 375) {
           this.mandaPontos(5);
         } else if (this.posicaoNota >= 375 && this.posicaoNota <= 390) {
           this.mandaPontos(10);

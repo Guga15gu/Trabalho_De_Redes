@@ -6,18 +6,9 @@ class Jogo {
     controleBolinhas
     jogadores = []
     jogadoresSuficientes = false
-    // numJogadores
-    // players
-    // estado
-    // opcode
+
     constructor(delayBolinhas) {
         this.DELAYBOLINHAS = delayBolinhas
-        //this.id = ws._socket.remoteAddress.substr(7),
-        //console.log(this.id)
-        // this.#numJogadores = 0
-        // this.#players = []
-        // this.#opcode = opcode
-        //this.#estado = estado
     }
 
     adicionaJogador(ws) {
@@ -34,11 +25,7 @@ class Jogo {
         }
     }
 
-    printDebug() {
-        console.log(this)
-    }
-
-    enviaMensagemDoJogo(tipo, mensagem) {
+    enviaMensagemProsJogadores(tipo, mensagem) {
         if (this.jogadoresSuficientes) {
             this.jogadores[0]?.ws.send(this.mensagemProCliente(tipo, mensagem))
             this.jogadores[1]?.ws.send(this.mensagemProCliente(tipo, mensagem))
@@ -57,25 +44,27 @@ class Jogo {
     controlaAsBolinhas() {
         this.controleBolinhas = setInterval(() => {
             let bolinha = Math.trunc(Math.random() * 4)
-            this.enviaMensagemDoJogo("ligaBolinha", bolinha)
+            this.enviaMensagemProsJogadores("ligaBolinha", bolinha)
         }, this.DELAYBOLINHAS);
 
     }
 
     atualizaPontos(valor, jogador) {
         if(jogador == this.jogadores[0].ws){
-            this.jogadores[0].pontos += valor
-            this.jogadores[0].ws.send(this.mensagemProCliente("atualizacaoPontos", this.jogadores[0].pontos))
+            this.jogadores[0].pontos += valor 
         } else if(jogador == this.jogadores[1].ws){
             this.jogadores[1].pontos += valor
-            this.jogadores[1].ws.send(this.mensagemProCliente("atualizacaoPontos", this.jogadores[1].pontos))
         }
+        //manda as atualizações de pontos para ambos os clientes
+        this.jogadores[0].ws.send(this.mensagemProCliente("atualizacaoPontos", [this.jogadores[0].pontos,this.jogadores[1].pontos]))
+        this.jogadores[1].ws.send(this.mensagemProCliente("atualizacaoPontos", [this.jogadores[1].pontos,this.jogadores[0].pontos]))
     }
 
     resetaPontos() {
         this.jogadores[0].pontos = 0
         this.jogadores[1].pontos = 0
-        this.enviaMensagemDoJogo("atualizacaoPontos", 0)
+
+        this.enviaMensagemProsJogadores("atualizacaoPontos", [0,0])
     }
 
     controlaEstado(controle) {
@@ -84,8 +73,9 @@ class Jogo {
         }
         else if (controle == 0) {
             this.finalizaJogo()
-            this.jogadores[0].ws.close()
-            this.jogadores[1].ws.close()
+            this.jogadores[0]?.ws.close()
+            this.jogadores[1]?.ws.close()
+            this.jogadores= []
         } else {
             return
         }
@@ -94,14 +84,13 @@ class Jogo {
     iniciaJogo() {
         this.resetaPontos()
         this.controlaAsBolinhas()
-        this.enviaMensagemDoJogo("controleJogo", "jogoIniciou")
+        this.enviaMensagemProsJogadores("controleJogo", "jogoIniciou")
     }
 
     finalizaJogo() {
         clearInterval(this.controleBolinhas)
-        this.resetaPontos()
-        this.enviaMensagemDoJogo("resultadoFinal","fim")
-        this.enviaMensagemDoJogo("controleJogo", "jogoTerminou")
+        this.enviaMensagemProsJogadores("resultadoFinal","fim")
+        this.enviaMensagemProsJogadores("controleJogo", "jogoTerminou")
     }
 }
 

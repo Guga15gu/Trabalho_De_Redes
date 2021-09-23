@@ -33,7 +33,10 @@
           @maisPontos="atualizaPontuacao"
         />
       </div>
-      <h1 id="pontos">Pontos: {{ pontos }}</h1>
+      <div id="pontos">
+        <h1>Pontos: {{ pontos }}</h1>
+        <h1>Adversario: {{ pontosAdversario }}</h1>
+      </div>
       <button @click="finalizaJogo" class="controleJogo finalizar">Sair</button>
     </div>
   </div>
@@ -41,7 +44,7 @@
 
 <script>
 import Botao from "./Botao.vue";
-import Monitor from "./Monitor.vue"
+import Monitor from "./Monitor.vue";
 import { ip } from "../../config/ip";
 
 export default {
@@ -53,7 +56,8 @@ export default {
       ativaD: 0,
       ativaF: 0,
       pontos: 0,
-      listaDeComandos: []
+      pontosAdversario: 0,
+      listaDeComandos: [],
     };
   },
   components: {
@@ -61,14 +65,13 @@ export default {
     Monitor,
   },
   methods: {
-    iniciaJogo: async function () {
+    iniciaJogo: function () {
       this.mode = "jogo";
-      //this.iniciaConexao();
     },
 
     finalizaJogo: function () {
       this.mode = "iniciar";
-      this.mensagemProServidor( "controleJogo", 0);
+      this.mensagemProServidor("controleJogo", 0);
     },
 
     atualizaPontuacao: function (e) {
@@ -76,7 +79,6 @@ export default {
     },
 
     ligaBolinha: function (n) {
-      //console.log(n)
       switch (n) {
         case 0:
           this.ativaA++;
@@ -97,44 +99,60 @@ export default {
       const url = `ws://${ip}:9585`;
       this.connection = new WebSocket(url);
 
-      this.connection.onopen = ()=>{
-        this.mensagemProServidor( "controleJogo", "aguardando")
-      }
+      this.connection.onopen = () => {
+        this.mensagemProServidor("controleJogo", "aguardando");
+      };
 
       this.connection.onmessage = (e) => {
-        const resposta = this.mensagemDoServidor(e)
+        const resposta = this.mensagemDoServidor(e);
         switch (resposta.tipo) {
           case "atualizacaoPontos":
-            this.pontos = resposta.mensagem;
+            this.pontos = resposta.mensagem[0];
+            this.pontosAdversario = resposta.mensagem[1];
             break;
           case "ligaBolinha":
             this.ligaBolinha(resposta.mensagem);
             break;
           case "controleJogo":
-            if(resposta.mensagem === "jogoIniciou"){
-              this.iniciaJogo()
-            } else if (resposta.mensagem == "jogoTerminou"){
-              window.alert("Algum dos jogadores finalizou o jogo")
+            if (resposta.mensagem === "jogoIniciou") {
+              this.iniciaJogo();
+            } else if (resposta.mensagem == "jogoTerminou") {
+              this.finalizaJogo();
+              let vitoria
+              if (this.pontos > this.pontosAdversario){
+                vitoria = "Você ganhou!"
+              } else if (this.pontos < this.pontosAdversario){
+                vitoria = "Você perdeu!"
+              }
+              else{
+                vitoria = "Houve um empate"
+              }
+              window.alert(`Algum dos jogadores finalizou o jogo!\nVocê fez ${this.pontos} pontos e o seu adversário fez ${this.pontosAdversario} pontos.\n${vitoria}
+              `);
+              window.location.reload(true)
             }
-            break;
-          case "resultadoFinal":
-            this.finalizaJogo()
-            //TODO IMPLEMENTAR A TELA FINAL
-            console.log(resposta.mensagem)
             break;
         }
       };
     },
-    mensagemProServidor: function (tipo, mensagem){
-      const mensagemFormatada = JSON.stringify({tipo,mensagem})
-      this.listaDeComandos.push({tipo: "enviadaDoCliente", mensagemFormatada, k:this.listaDeComandos.length})
-        this.connection.send(mensagemFormatada)
+    mensagemProServidor: function (tipo, mensagem) {
+      const mensagemFormatada = JSON.stringify({ tipo, mensagem });
+      this.listaDeComandos.push({
+        tipo: "enviadaDoCliente",
+        mensagemFormatada,
+        k: this.listaDeComandos.length,
+      });
+      this.connection.send(mensagemFormatada);
     },
-    mensagemDoServidor(msg){
+    mensagemDoServidor(msg) {
       const mensagemFormatada = JSON.parse(msg.data);
-      this.listaDeComandos.push({tipo: "enviadaDoServidor", mensagemFormatada, k:this.listaDeComandos.length})
-      return mensagemFormatada
-    }
+      this.listaDeComandos.push({
+        tipo: "enviadaDoServidor",
+        mensagemFormatada,
+        k: this.listaDeComandos.length,
+      });
+      return mensagemFormatada;
+    },
   },
 };
 </script>
@@ -146,7 +164,11 @@ export default {
   align-items: center;
 }
 
-#pontos {
+div#pontos {
+  display: flex;
+  justify-content: center;
+}
+div#pontos h1 {
   text-align: center;
   background-color: #dab351ce;
   border-radius: 40px;
@@ -154,10 +176,9 @@ export default {
   width: 200px;
   height: 60px;
   padding: 10px;
-  margin: auto;
-  margin-top: 30px;
-  margin-bottom: 30px;
+  margin: 30px;
   color: rgb(255, 255, 255);
+  display: inline;
 }
 
 .telaInicial {
@@ -191,5 +212,4 @@ export default {
 .controleJogo:hover {
   box-shadow: 10px 5px 5px rgba(0, 0, 0, 0.507);
 }
-
 </style>
