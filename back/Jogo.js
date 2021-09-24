@@ -19,11 +19,10 @@ class Jogo {
         else if (this.jogadores.length === 1) {
             this.jogadores.push({ws, pontos: 0})
             this.jogadoresSuficientes = true
-            console.log("Número correto de jogadores")
+            this.enviaMensagemProsJogadores(this.mensagemProCliente("controleJogador", "jogadoresSuficientes"))
             this.iniciaJogo()
         } else {
-            console.log("Temos jogadores demais")
-            this.jogadores[0]?.ws.send(this.mensagemProCliente("controleJogador", "jogadoresDemais"))
+            this.enviaMensagemProsJogadores(this.mensagemProCliente("controleJogador", "jogadoresDemais"))
         }
     }
 
@@ -39,7 +38,7 @@ class Jogo {
 
     mensagemProCliente(tipo, mensagem) {
         const mensagemFormatada = JSON.stringify({ tipo, mensagem })
-        console.log("Mandei" + mensagemFormatada)
+        //console.log("Mandei" + mensagemFormatada)
         return mensagemFormatada
     }
 
@@ -48,7 +47,6 @@ class Jogo {
             let bolinha = Math.trunc(Math.random() * 4)
             this.enviaMensagemProsJogadores("ligaBolinha", bolinha)
         }, this.DELAYBOLINHAS);
-
     }
 
     atualizaPontos(valor, jogador) {
@@ -91,7 +89,6 @@ class Jogo {
 
     finalizaJogo() {
         clearInterval(this.controleBolinhas)
-        this.enviaMensagemProsJogadores("resultadoFinal","fim")
         this.enviaMensagemProsJogadores("controleJogo", "jogoTerminou")
     }
 }

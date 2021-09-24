@@ -7,7 +7,7 @@ const jogoAtual = new Jogo (1700)
 wss.on('connection', ws => {//Conexão foi aberta
     jogoAtual.adicionaJogador(ws) // adiciona qualquer jogador que se conextar na sala
     ws.on('message', mensagem => {
-        console.log(`Recebi => ${mensagem}`)
+        //console.log(`Recebi => ${mensagem}`)
         const resposta = JSON.parse(mensagem)
         switch (resposta.tipo) {//Formatação de acordo com o tipo de mensagem
             case "atualizacaoPontos":

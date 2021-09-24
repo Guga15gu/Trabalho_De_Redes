@@ -132,7 +132,7 @@ export default {
                 vitoria = "Você perdeu!"
               }
               else{
-                vitoria = "Houve um empate"
+                vitoria = "Houve um empate."
               }
               window.alert(`Algum dos jogadores finalizou o jogo!\nVocê fez ${this.pontos} pontos e o seu adversário fez ${this.pontosAdversario} pontos.\n${vitoria}
               `);
