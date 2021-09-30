@@ -9,7 +9,9 @@ Para rodar a aplicação, é preciso ter o [node](https://nodejs.org/en/) instal
 Uma vez que o node esteja instalado na sua máquina, você deve abrir a pasta **front** em um terminal e digitar o comando `npm i` para instalar as dependências do projeto.
 
 Uma vez que as dependências tenham sido instaladas, ainda na pasta front você deve rodar o comando `npm start` para iniciar a aplicação. Uma vez feito isso, o programa será compilado, e um endereço de acesso será mostrado no seu terminal:
+
 <img src = "imagens/acesso.png"/>
+
 O acesso na sua máquina pode ser feito pelo endereço **Local**, e o acessoem outras máquinas pode ser feito pelo endereço mostrado ne **Network**.
 
 *Obs: Para terminar a aplicação é preciso apertar CTRL+C no terminal*
