@@ -2,11 +2,9 @@
 ## Gustavo Machado e Letícia Garcez
 <img src = "imagens/rodando.gif"/>
 
-## Enunciado do trabalho:
-
 ## Como rodar a aplicação
 Para rodar a aplicação, é preciso ter o [node](https://nodejs.org/en/) instalado no seu computador. 
-Uma vez que o node esteja instalado na sua máquina, você deve abrir a pasta **front** em um terminal e digitar o comando `npm i` para instalar as dependências do projeto.
+Uma vez que o node esteja instalado na sua máquina, você deve abrir a pasta **front** em um terminal e digitar o comando `npm run config` para instalar as dependências do projeto.
 
 Uma vez que as dependências tenham sido instaladas, você deve acessar a pasta **front/config** e alterar o arquivo **ip.js** substituindo o valor da variável pelo *ip* pelo valor do IP local do seu computador. Voltando à pasta front aberta no terminal, você deve rodar o comando `npm start` para iniciar a aplicação. Uma vez feito isso, o programa será compilado, e um endereço de acesso será mostrado no seu terminal:
 
@@ -26,7 +24,6 @@ Uma vez iniciado o jogo, o servidor da aplicação enviará para ambos os jogado
 O jogo acaba quando um dos jogadores apertar no botão de sair na tela. Isso gerará um alerta da mensagem que dirá se o jogador ganhou, perdeu, ou houve um empate.
 
 **Importante: a aplicação não está funcional para mobile, mas você pode acessar o servidor da aplicação pelo celular e clicar no botão de iniciar para simular um segundo jogador e conseguir ver o jogo funcionando.**
-
 
 
 ## Links úteis
