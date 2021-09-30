@@ -4,7 +4,7 @@
     <div v-if="mode == 'iniciar'" class="telaInicial">
       <h1>Trabalho de Redes 2021/1</h1>
       <h2>Gustavo Machado e Letícia Garcez</h2>
-      <button @click="iniciaConexao" class="controleJogo">Iniciar</button>
+      <button @click="iniciaConexao2" class="controleJogo">Iniciar</button>
     </div>
     <div v-else>
       <div id="conjuntoTeclas">
@@ -46,6 +46,7 @@
 import Botao from "./Botao.vue";
 import Monitor from "./Monitor.vue";
 import { ip } from "../../config/ip";
+//import client_ from "../../../back2/client";
 
 export default {
   data: function () {
@@ -57,6 +58,10 @@ export default {
       ativaF: 0,
       pontos: 0,
       pontosAdversario: 0,
+      client: 1,
+      estado: 0,
+      estadoX:0,
+      clientX: null,
       listaDeComandos: [],
     };
   },
@@ -81,8 +86,15 @@ export default {
       this.mensagemProServidor("controleJogo", 0);
     },
 
+    finalizaJogo1: function () {
+      this.mode = "iniciar";
+      this.mensagemProServidor("controleJogo", 0);
+    },
     atualizaPontuacao: function (e) {
-      this.mensagemProServidor("atualizacaoPontos", e);
+
+      if(this.estadoX == 3){
+        this.clientX.write("Acerto %d", e)
+      }
     },
 
     ligaBolinha: function (n) {
@@ -100,6 +112,138 @@ export default {
           this.ativaF++;
           break;
       }
+    },
+
+    iniciaConexao2: function(){
+
+  
+    const net = require('net');
+    
+    const client = new net.Socket();
+    var estado = 0
+    const port = 9080
+    client.connect({ port: port });
+
+    this.estadoX = estado
+    this.clientX = client
+    var opcode = ""
+
+    client.on('data', (data) => {
+        console.log(data.toString('utf-8'));
+
+        opcode = data.toString().substring(0, data.indexOf(" "))
+        let conteudo = data.toString().substring(data.indexOf(" "))
+
+        switch (estado){
+
+            case 0:
+                estado_0(conteudo)   
+            break
+
+            case 1:
+                estado_1(conteudo)
+            break
+
+            case 2:
+                estado_2(conteudo)
+            break
+
+            case 3:
+                estado_3(conteudo)
+            break
+            
+            case 4:
+                estado_4(conteudo)
+            break
+            default:
+                console.log("Estado %d não identificado", estado)
+            break
+        }
+        this.estadoX = estado
+    });
+
+    function estado_0(conteudo){
+
+        console.log("estado_0")
+        client.write("Conectar ")
+        estado = 1
+        console.log("conteudo %d", conteudo)
+    }
+
+
+    function estado_1(conteudo){
+
+        console.log("estado_1")
+        client.write("Pronto ")
+        estado = 2
+        console.log("conteudo %d", conteudo)
+    }
+
+    function estado_2(conteudo){
+        console.log("estado_2")
+
+        switch (opcode){
+            case "Comecou":
+                estado = 3
+            break
+
+            case "":
+            break
+
+            default:
+                console.log("Opcode - %s - não identificado", opcode)
+            break
+        }   
+      console.log("conteudo %d", conteudo)
+    }
+    function estado_3(conteudo){
+
+        switch (opcode){
+            case "fimDeJogo":
+                client.write("adeus ")
+                estado = 4
+            break
+
+            case "pontosSeus":
+                this.pontos = conteudo
+            break
+
+            case "pontosAdversario":
+                this.pontosAdversario = conteudo
+            break
+
+            case "ligaBolinha":
+                this.ligaBolinha = conteudo
+            break
+
+            default:
+                console.log("Opcode - %s - não identificado", opcode)
+            break
+        }   
+        console.log("estado_3")
+        console.log("conteudo %d", conteudo)
+    }
+
+    function estado_4(conteudo){
+
+        console.log("estado_4")
+        this.finalizaJogo1();
+        let vitoria
+                if (this.pontos > this.pontosAdversario){
+                vitoria = "Você ganhou!"
+                } else if (this.pontos < this.pontosAdversario){
+                vitoria = "Você perdeu!"
+                }
+                else{
+                vitoria = "Houve um empate."
+                }
+                window.alert(`Algum dos jogadores finalizou o jogo!\nVocê fez ${this.pontos} pontos e o seu adversário fez ${this.pontosAdversario} pontos.\n${vitoria}
+                `);
+                window.location.reload(true)
+
+        console.log("conteudo %d", conteudo)
+        client.end();
+    }
     },
 
     iniciaConexao: function () {
