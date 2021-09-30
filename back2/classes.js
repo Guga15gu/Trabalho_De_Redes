@@ -2,16 +2,28 @@
 class Game {
     #id
     #numJogadores
+    #delayBolinhas
     #players
     #estado
     #opcode
-    constructor(id, estado, opcode){
+    constructor(id, estado, opcode, delay){
 
         this.#id = id
         this.#numJogadores = 0
         this.#players = []
         this.#opcode = opcode
         this.#estado = estado
+        this.#delayBolinhas = [delay, delay, delay, delay]
+    }
+
+    setDelayBolinha(qual, valor){
+
+        this.#delayBolinhas(qual) = valor
+    }
+
+    getDelayBolinha(qual){
+
+        return this.#delayBolinhas(qual)
     }
 
     addPlayer(nome, socket){
@@ -61,6 +73,15 @@ class Game {
         }
         return true
     }
+
+    writeAllPlayersExceptMe(message, socket){
+        for(var i = 0; i< this.#numJogadores; ++i){
+            if(this.#players[i].getSocket() != s){
+                this.#players[i].sendMessage(message)
+            }
+        }
+    }
+
     writeAllPlayers(message){
         for(var i = 0; i< this.#numJogadores; ++i){
             this.#players[i].sendMessage(message)

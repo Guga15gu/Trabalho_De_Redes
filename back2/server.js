@@ -1,6 +1,6 @@
 const net = require('net');
 const Game = require('./classes.js')
-const port = 8080
+const port = 9080
 
 var sala = 0
 var gameSalas = []
@@ -36,21 +36,23 @@ const server = net.createServer( (socket2) => {
 
         gameSalas[salaCliente].setOpcode(data.toString().substring(0, data.indexOf(" ")))
 
+        let conteudo = data.toString().substring(data.indexOf(" "))
+
         switch (gameSalas[salaCliente].getEstado()){
             case 0:
-                estado_0(gameSalas[salaCliente], socket2)
+                estado_0(gameSalas[salaCliente], socket2, conteudo)
             break;
         
             case 1:
-                estado_1(gameSalas[salaCliente], socket2)
+                estado_1(gameSalas[salaCliente], socket2, conteudo)
             break;
             
             case 2:
-                estado_2(gameSalas[salaCliente], socket2)
+                estado_2(gameSalas[salaCliente], socket2, conteudo)
             break;
     
             case 3:
-                estado_3(gameSalas[salaCliente], socket2)
+                estado_3(gameSalas[salaCliente], socket2, conteudo)
             break;
 
             default:
@@ -68,7 +70,7 @@ const server = net.createServer( (socket2) => {
 
 server.listen(port);
 
-function estado_0(x, socket){
+function estado_0(x, socket, conteudo){
 
     console.log("estado_0")
 
@@ -96,7 +98,7 @@ function estado_0(x, socket){
     }
 }
 
-function estado_1(x, socket){
+function estado_1(x, socket, conteudo){
 
     console.log("estado_1")
     switch (x.getOpcode()){
@@ -127,21 +129,30 @@ function estado_1(x, socket){
     }
 }
 
-function estado_2(x, socket){
+function estado_2(x, socket, conteudo){
 
     console.log("estado_2")
     switch (x.getOpcode()){
 
         case "Acerto":
             console.log("Opcode - %s - identificado", x.getOpcode())
-            
+            x.getPlayer(socket).addAcerto(conteudo)
+
+            socket.write("pontosSeus %d", x.getPlayer(socket).getAcertos)
+            x.writeAllPlayersExceptMe("pontosAdversario %d", x.getPlayer(socket).getAcertos)
+
+            if(x.getPlayer(socket).getAcertos(0) == 10){
+                x.writeAllPlayers("fimDeJogo ")
+                x.setEstado(3)
+            }
             break
         case "Erro":
             console.log("Opcode - %s - identificado", x.getOpcode())
-           
+            x.getPlayer(socket).addErro(conteudo)
             break
         case "MeioAcerto":
             console.log("Opcode - %s - identificado", x.getOpcode())
+            x.getPlayer(socket).addMeioAcerto(conteudo)
             break
         default:
             console.log("Opcode - %s - não identificado", x.getOpcode())
@@ -150,8 +161,24 @@ function estado_2(x, socket){
     }
 }
 
-function estado_3(x, socket){
+function estado_3(x, socket, conteudo){
 
-    console.log("estado_3")
-    socket.write("FimDeJogo ")
+    switch (x.getOpcode()){
+
+        case "adeus ":
+            console.log("Opcode - %s - identificado", x.getOpcode())
+            socket.write("adeus ")
+            break
+
+        case "":
+    
+            break
+        default:
+            console.log("Opcode - %s - não identificado", x.getOpcode())
+            //socket.write("OpcodeErrado ")
+            break
+    }
+
+    console.log("estado_3, fim de jogo")
+    
 }
